@@ -312,7 +312,7 @@ prepare_alert () {
 	local END_TIME
 	local DURATION
 
-    if [ $METRIC_NAME = 'cpu' && $INCIDENT_STATUS = 'OPENED' ]; then
+    if [[ $METRIC_NAME = 'cpu' && $INCIDENT_STATUS = 'OPENED' ]]; then
 		thread_dump
 	fi
 
