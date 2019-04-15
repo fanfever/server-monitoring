@@ -1,5 +1,5 @@
 #!/bin/bash
-PATH=/usr/sbin:/sbin:/usr/bin:/bin
+#PATH=/usr/sbin:/sbin:/usr/bin:/bin
 
 # ==========================
 # Server monitoring script
@@ -259,10 +259,10 @@ start_incident () {
 	local INCIDENT_FILE=$( get_incident_filename $METRIC_NAME $SEVERITY )
 	local START_TIME=$( date +%s )
 
-	cat > $INCIDENT_FILE << EOF
-INCIDENT_ID=${INCIDENT_ID}
-START_TIME=${START_TIME}
-EOF
+#	cat > $INCIDENT_FILE << EOF
+#INCIDENT_ID=${INCIDENT_ID}
+#START_TIME=${START_TIME}
+#EOF
 
 	prepare_alert $INCIDENT_ID OPENED $METRIC_NAME $METRIC_VALUE $SEVERITY $LIMIT $START_TIME
 
@@ -311,9 +311,16 @@ prepare_alert () {
 	local START_TIME=$7
 	local END_TIME
 	local DURATION
-
-    if [[ $METRIC_NAME = 'cpu' && $INCIDENT_STATUS = 'OPENED' ]]; then
-		thread_dump
+        local PROCESS_ID="$(top -b -n 1 | grep java | head -n 1 | awk '{print $1}')"
+        local JCMD="$(which jcmd)"
+        echo $JCMD
+        local PROCESS_NAME="$($JCMD | grep $PROCESS_ID | awk '{print $2}')"
+        echo $PROCESS_NAME
+        if [[ $METRIC_NAME = 'cpu' && $INCIDENT_STATUS = 'OPENED' ]]; then
+		echo $INCIDENT_ID
+		echo $METRIC_NAME
+		echo $METRIC_VALUE
+		thread_dump $PROCESS_ID $PROCESS_NAME
 	fi
 
 	if [ $# = 8 ]; then
@@ -387,8 +394,11 @@ EOF
 }
 
 thread_dump(){
-    JSTACK="${whick jstack}";
-    ./show-busy-java-threads 3 5 -c 10 -s $JSTACK -a log/`date "+%Y-%m-%d_%H:%M:%S.%N"`.log -S store
+    local PROCESS_ID=$1
+    local PROCESS_NAME=$2
+    
+    JSTACK="$(which jstack)"
+    bash ./show-busy-java-threads 3 5 -c 10 -s $JSTACK -a log/$PROCESS_NAME_`date "+%Y-%m-%d_%H:%M:%S.%N"`.out -S store
 }
 
 if [ $INFO = "true" ]; then
