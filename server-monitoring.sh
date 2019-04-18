@@ -398,7 +398,7 @@ thread_dump(){
     local PROCESS_NAME=$2
     
     JSTACK="$(which jstack)"
-    bash ./show-busy-java-threads 3 5 -c 10 -s $JSTACK -a log/$PROCESS_NAME_`date "+%Y-%m-%d_%H:%M:%S.%N"`.out -S store
+    bash ./show-busy-java-threads 3 5 -p $PROCESS_ID -c 10 -s $JSTACK -a log/$PROCESS_NAME_`date "+%Y-%m-%d_%H:%M:%S.%N"`.out -S store
 }
 
 if [ $INFO = "true" ]; then
